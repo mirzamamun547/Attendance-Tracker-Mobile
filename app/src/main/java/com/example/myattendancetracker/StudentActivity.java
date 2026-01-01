@@ -1,4 +1,7 @@
 package com.example.myattendancetracker;
 
-public class StudentActivity {
+
+
+public class StudentActivity  {
+
 }
