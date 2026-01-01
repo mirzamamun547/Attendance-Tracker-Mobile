@@ -1,22 +1,40 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:gravity="center"
+    android:gravity="center_horizontal"
     android:padding="24dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Profile picture -->
     <ImageView
         android:id="@+id/imgProfile"
-        android:src="@drawable/ic_user"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:scaleType="centerCrop"/>
+        android:src="@drawable/ic_user"
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="16dp"/>
 
+    <!-- Upload button -->
     <Button
         android:id="@+id/btnUpload"
-        android:text="Upload Picture"
-        android:layout_marginTop="16dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="Upload Picture"
+        android:layout_marginBottom="24dp"/>
 
+    <!-- Info text -->
+    <TextView
+        android:id="@+id/tvInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Continue button -->
+    <Button
+        android:id="@+id/btnContinue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Continue"/>
 </LinearLayout>
