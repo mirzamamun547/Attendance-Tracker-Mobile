@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class AddStudentActivity extends AppCompatActivity {
 
-    private EditText etStudentName, etStudentEmail, etStudentClass;
+    private EditText etStudentName, etStudentEmail, etStudentClass, etStudentRoll;
     private Button btnAddStudent;
 
     private FirebaseFirestore db;
@@ -26,58 +26,61 @@ public class AddStudentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_student);
 
-        // Initialize Firestore and FirebaseAuth
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Initialize views
         etStudentName = findViewById(R.id.etStudentName);
         etStudentEmail = findViewById(R.id.etStudentEmail);
-        etStudentClass = findViewById(R.id.etStudentClass); // Class/Section
+        etStudentClass = findViewById(R.id.etStudentClass);
+        etStudentRoll = findViewById(R.id.etStudentRoll); // ✅ ADD THIS
         btnAddStudent = findViewById(R.id.btnAddStudent);
 
-        btnAddStudent.setOnClickListener(v -> addStudentToFirestore());
+        btnAddStudent.setOnClickListener(v -> addStudent());
     }
 
-    private void addStudentToFirestore() {
+    private void addStudent() {
+
         String name = etStudentName.getText().toString().trim();
         String email = etStudentEmail.getText().toString().trim();
-        String classSection = etStudentClass.getText().toString().trim();
+        String className = etStudentClass.getText().toString().trim();
+        String rollStr = etStudentRoll.getText().toString().trim();
 
-        if (name.isEmpty() || email.isEmpty() || classSection.isEmpty()) {
-            Toast.makeText(this, "Please enter name, email, and class/section", Toast.LENGTH_SHORT).show();
+        if (name.isEmpty() || email.isEmpty() || className.isEmpty() || rollStr.isEmpty()) {
+            Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Get current teacher ID
-        String teacherId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : "";
-
-        if (teacherId.isEmpty()) {
+        String teacherId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
+        if (teacherId == null) {
             Toast.makeText(this, "Teacher not logged in", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Prepare student data
+        int roll = Integer.parseInt(rollStr);
+
         Map<String, Object> student = new HashMap<>();
         student.put("name", name);
         student.put("email", email);
-        student.put("role", "Student");
-        student.put("classSection", classSection);
-        student.put("teacherId", teacherId); // Link student to teacher
-        student.put("presentDays", 0);       // Initialize attendance
+        student.put("roll", roll);
+        student.put("className", className);
+        student.put("teacherId", teacherId);
+        student.put("presentDays", 0);
         student.put("totalDays", 0);
 
-        // Save to Firestore under "students" collection
         db.collection("students")
                 .add(student)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(this, "Student added successfully!", Toast.LENGTH_SHORT).show();
-                    etStudentName.setText("");
-                    etStudentEmail.setText("");
-                    etStudentClass.setText("");
+                .addOnSuccessListener(doc -> {
+                    Toast.makeText(this, "Student added successfully", Toast.LENGTH_SHORT).show();
+                    clearFields();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error adding student: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void clearFields() {
+        etStudentName.setText("");
+        etStudentEmail.setText("");
+        etStudentClass.setText("");
+        etStudentRoll.setText("");
     }
 }

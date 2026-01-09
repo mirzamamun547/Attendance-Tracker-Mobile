@@ -22,10 +22,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <!-- New Class/Section Field -->
+    <!-- ✅ Roll Number -->
+    <EditText
+        android:id="@+id/etStudentRoll"
+        android:hint="Roll Number"
+        android:inputType="number"
+        android:background="@drawable/input_bg"
+        android:padding="14dp"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- Class / Section -->
     <EditText
         android:id="@+id/etStudentClass"
-        android:hint="Class/Section"
+        android:hint="Class / Section"
         android:background="@drawable/input_bg"
         android:padding="14dp"
         android:layout_marginTop="12dp"

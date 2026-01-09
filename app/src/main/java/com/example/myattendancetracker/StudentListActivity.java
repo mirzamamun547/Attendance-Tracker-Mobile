@@ -3,6 +3,7 @@ package com.example.myattendancetracker;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -25,8 +26,8 @@ public class StudentListActivity extends AppCompatActivity {
     private EditText etSearch;
     private Spinner spinnerClass;
 
-    private List<Student> studentList = new ArrayList<>();
-    private List<Student> filteredList = new ArrayList<>();
+    private final List<Student> studentList = new ArrayList<>();
+    private final List<Student> filteredList = new ArrayList<>();
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -50,9 +51,10 @@ public class StudentListActivity extends AppCompatActivity {
 
         setupSearch();
         setupClassFilter();
-        loadTeacherStudents(); // ✅ Load students for the logged-in teacher
+        loadTeacherStudents();
     }
 
+    // ---------------- SEARCH ----------------
     private void setupSearch() {
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -63,6 +65,7 @@ public class StudentListActivity extends AppCompatActivity {
         });
     }
 
+    // ---------------- CLASS FILTER ----------------
     private void setupClassFilter() {
         spinnerClass.setOnItemSelectedListener(new SimpleItemSelectedListener() {
             @Override
@@ -72,62 +75,109 @@ public class StudentListActivity extends AppCompatActivity {
         });
     }
 
+    // ---------------- LOAD STUDENTS ----------------
     private void loadTeacherStudents() {
+
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "Teacher not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String teacherId = mAuth.getCurrentUser().getUid();
 
         db.collection("students")
-                .whereEqualTo("teacherId", teacherId) // 🔑 Only this teacher's students
+                .whereEqualTo("teacherId", teacherId)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
+
                     studentList.clear();
                     filteredList.clear();
 
                     for (QueryDocumentSnapshot doc : querySnapshot) {
-                        int roll = doc.getLong("roll") != null ? doc.getLong("roll").intValue() : 0;
-                        String name = doc.getString("name");
-                        String className = doc.getString("className");
-                        int presentDays = doc.getLong("presentDays") != null ? doc.getLong("presentDays").intValue() : 0;
-                        int totalDays = doc.getLong("totalDays") != null ? doc.getLong("totalDays").intValue() : 0;
 
-                        Student s = new Student(roll, name, className, presentDays, totalDays);
-                        studentList.add(s);
+                        // 🔑 Firestore document ID
+                        String id = doc.getId();
+
+                        int roll = doc.getLong("roll") != null
+                                ? doc.getLong("roll").intValue() : 0;
+
+                        String name = doc.getString("name");
+
+                        // 🔴 MUST MATCH AddStudentActivity FIELD NAME
+                        String className = doc.getString("classSection");
+
+                        int presentDays = doc.getLong("presentDays") != null
+                                ? doc.getLong("presentDays").intValue() : 0;
+
+                        int totalDays = doc.getLong("totalDays") != null
+                                ? doc.getLong("totalDays").intValue() : 0;
+
+                        // ✅ CORRECT CONSTRUCTOR
+                        Student student = new Student(
+                                id,
+                                roll,
+                                name,
+                                className,
+                                presentDays,
+                                totalDays
+                        );
+
+                        studentList.add(student);
                     }
 
                     filteredList.addAll(studentList);
                     adapter.notifyDataSetChanged();
-
-                    // Optionally populate spinnerClass with classes
                     populateClassSpinner();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to load students: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e ->
+                        Toast.makeText(this,
+                                "Failed to load students: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show()
+                );
     }
 
+    // ---------------- FILTER LOGIC ----------------
     private void filterStudents(String query) {
         filteredList.clear();
-        String selectedClass = spinnerClass.getSelectedItem() != null ? spinnerClass.getSelectedItem().toString() : "All";
+
+        String selectedClass = spinnerClass.getSelectedItem() != null
+                ? spinnerClass.getSelectedItem().toString()
+                : "All";
 
         for (Student s : studentList) {
-            boolean matchName = s.getName().toLowerCase().contains(query.toLowerCase());
-            boolean matchClass = selectedClass.equals("All") || s.getClassName().equals(selectedClass);
+
+            boolean matchName = s.getName() != null &&
+                    s.getName().toLowerCase().contains(query.toLowerCase());
+
+            boolean matchClass = selectedClass.equals("All") ||
+                    (s.getClassName() != null && s.getClassName().equals(selectedClass));
 
             if (matchName && matchClass) {
                 filteredList.add(s);
             }
         }
+
         adapter.notifyDataSetChanged();
     }
 
+    // ---------------- CLASS SPINNER ----------------
     private void populateClassSpinner() {
-        // Optional: dynamically fill spinner with teacher's classes
+
         List<String> classes = new ArrayList<>();
         classes.add("All");
+
         for (Student s : studentList) {
-            if (!classes.contains(s.getClassName())) {
+            if (s.getClassName() != null && !classes.contains(s.getClassName())) {
                 classes.add(s.getClassName());
             }
         }
 
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(this,
+                        android.R.layout.simple_spinner_item,
+                        classes);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerClass.setAdapter(adapter);
     }
 }

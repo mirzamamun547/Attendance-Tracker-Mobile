@@ -28,7 +28,6 @@ public class TeacherActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.nav_view);
 
-        // Set toolbar as ActionBar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -40,7 +39,6 @@ public class TeacherActivity extends AppCompatActivity {
                 R.string.open_drawer,
                 R.string.close_drawer
         );
-
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -48,17 +46,23 @@ public class TeacherActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
-            if (id == R.id.nav_add_student) {
-                // Example: open AddStudentActivity
+            if (id == R.id.nav_attendance) {
+                // Open Attendance Activity
+                Intent intent = new Intent(TeacherActivity.this, AttendanceActivity.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_add_class) {
+                // Open Add Class Activity
+                Intent intent = new Intent(TeacherActivity.this, AddClassActivity.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_add_student) {
+                // Open Add Student Activity
                 Intent intent = new Intent(TeacherActivity.this, AddStudentActivity.class);
                 startActivity(intent);
-            }
-            else if (id == R.id.nav_view_students) {
-                // Open StudentListActivity
+            } else if (id == R.id.nav_view_students) {
+                // Open View Students Activity
                 Intent intent = new Intent(TeacherActivity.this, StudentListActivity.class);
                 startActivity(intent);
-            }
-            else if (id == R.id.nav_logout) {
+            } else if (id == R.id.nav_logout) {
                 auth.signOut();
                 Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
                 finish();
