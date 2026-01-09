@@ -11,6 +11,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <!-- Date Picker Trigger -->
+    <Button
+        android:id="@+id/btnSelectDate"
+        android:text="Select Date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/tvSelectedDate"
+        android:text="No date selected"
+        android:textSize="16sp"
+        android:layout_marginTop="4dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <ListView
         android:id="@+id/lvClasses"
         android:layout_width="match_parent"
