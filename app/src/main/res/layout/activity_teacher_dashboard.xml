@@ -4,20 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- MAIN CONTENT -->
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:text="Teacher Dashboard"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:padding="16dp"
-            android:background="#4F46E5"
-            android:textColor="#FFFFFF"
+        <!-- TOOLBAR (REQUIRED) -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:background="#4F46E5"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:title="Teacher Dashboard"
+            app:titleTextColor="@android:color/white" />
 
         <FrameLayout
             android:id="@+id/container"
@@ -26,11 +27,12 @@
 
     </LinearLayout>
 
+    <!-- NAVIGATION DRAWER -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        android:layout_gravity="start"
-        app:menu="@menu/menu_teacher"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/menu_teacher"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

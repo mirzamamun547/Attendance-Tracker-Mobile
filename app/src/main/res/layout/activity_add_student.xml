@@ -22,6 +22,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <!-- New Class/Section Field -->
+    <EditText
+        android:id="@+id/etStudentClass"
+        android:hint="Class/Section"
+        android:background="@drawable/input_bg"
+        android:padding="14dp"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
     <Button
         android:id="@+id/btnAddStudent"
         android:text="Add Student"
