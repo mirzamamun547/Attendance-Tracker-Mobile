@@ -13,9 +13,37 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <!-- RecyclerView for classes -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvClasses"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="12dp"/>
 
+    <!-- Reason of Absence -->
+    <TextView
+        android:text="Reason for Absence"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/etReason"
+        android:hint="Enter your reason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:minLines="3"
+        android:background="@android:drawable/edit_text"
+        android:padding="8dp"
+        android:layout_marginBottom="12dp"/>
+
+    <Button
+        android:id="@+id/btnSubmitReason"
+        android:text="Submit Reason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>

@@ -128,7 +128,6 @@ public class StudentListActivity extends AppCompatActivity {
                 classes.add(s.getClassName());
             }
         }
-        // Assuming you have an ArrayAdapter<String> for spinnerClass
-        // spinnerClass.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, classes));
+
     }
 }

@@ -2,5 +2,6 @@
     <string name="app_name">My Attendance Tracker</string>
     <string name="open_drawer">Open</string>
     <string name="close_drawer">Close</string>
+    <string name="default_web_client_id">249512398202-hi4vr08arq4jb17pepb8m7b75hovv4p7.apps.googleusercontent.com</string>
 
 </resources>

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "249512398202-naf58mko37j1am0vske1qhavcubkjo6g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myattendancetracker",
+            "certificate_hash": "5d572785205ec62b76fe127bb2ae516d1b1b33ec"
+          }
+        },
+        {
           "client_id": "249512398202-hi4vr08arq4jb17pepb8m7b75hovv4p7.apps.googleusercontent.com",
           "client_type": 3
         }

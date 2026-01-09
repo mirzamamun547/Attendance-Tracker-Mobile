@@ -7,40 +7,77 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class StudentActivity extends AppCompatActivity {
 
-    private EditText etStudentName, etStudentEmail;
-    private Button btnAddStudent;
+    private RecyclerView rvClasses;
+    private EditText etReason;
+    private Button btnSubmitReason;
+
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private String studentUid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_student); // <-- your XML file name
+        setContentView(R.layout.activity_student_dashboard);
 
         // Initialize views
-        etStudentName = findViewById(R.id.etStudentName);
-        etStudentEmail = findViewById(R.id.etStudentEmail);
-        btnAddStudent = findViewById(R.id.btnAddStudent);
+        rvClasses = findViewById(R.id.rvClasses);
+        etReason = findViewById(R.id.etReason);
+        btnSubmitReason = findViewById(R.id.btnSubmitReason);
 
-        // Handle button click
-        btnAddStudent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String name = etStudentName.getText().toString().trim();
-                String email = etStudentEmail.getText().toString().trim();
+        // Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) studentUid = user.getUid();
 
-                if (name.isEmpty() || email.isEmpty()) {
-                    Toast.makeText(StudentActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-                } else {
-                    // For now, just show a confirmation
-                    Toast.makeText(StudentActivity.this,
-                            "Student Added:\nName: " + name + "\nEmail: " + email,
-                            Toast.LENGTH_LONG).show();
+        // Setup RecyclerView (just dummy data for now)
+        rvClasses.setLayoutManager(new LinearLayoutManager(this));
+        String[] classes = {"Math", "Science", "History"}; // Replace with actual classes from Firestore
+        ClassAdapter adapter = new ClassAdapter(classes);
+        rvClasses.setAdapter(adapter);
 
-                    // 👉 Later: Save to Firebase Realtime Database or SQLite
-                }
-            }
-        });
+        // Submit absence reason
+        btnSubmitReason.setOnClickListener(v -> submitReason());
+    }
+
+    private void submitReason() {
+        String reason = etReason.getText().toString().trim();
+
+        if (reason.isEmpty()) {
+            Toast.makeText(this, "Please enter a reason", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (studentUid == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Save reason to Firestore under "absence_reasons" collection
+        Map<String, Object> data = new HashMap<>();
+        data.put("studentUid", studentUid);
+        data.put("reason", reason);
+        data.put("timestamp", System.currentTimeMillis());
+
+        db.collection("absence_reasons")
+                .add(data)
+                .addOnSuccessListener(docRef -> {
+                    Toast.makeText(this, "Reason submitted!", Toast.LENGTH_SHORT).show();
+                    etReason.setText("");
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Failed to submit: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 }

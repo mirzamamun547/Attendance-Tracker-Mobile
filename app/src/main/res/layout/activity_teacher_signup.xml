@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8FAFC"
-    android:padding="24dp">
+    android:padding="24dp"
+    android:fillViewport="true">
 
     <LinearLayout
         android:orientation="vertical"
@@ -12,65 +13,90 @@
 
         <!-- Title -->
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Teacher Signup"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="#1E293B"
-            android:layout_marginBottom="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp"/>
 
         <!-- Name -->
         <EditText
             android:id="@+id/etTeacherName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Full Name"
             android:background="@drawable/input_bg"
             android:padding="14dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:inputType="textPersonName"/>
 
         <!-- Email -->
         <EditText
             android:id="@+id/etTeacherEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Email"
             android:inputType="textEmailAddress"
             android:background="@drawable/input_bg"
             android:padding="14dp"
-            android:layout_marginTop="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_marginTop="12dp"/>
 
         <!-- Password -->
         <EditText
             android:id="@+id/etTeacherPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Password"
             android:inputType="textPassword"
             android:background="@drawable/input_bg"
             android:padding="14dp"
-            android:layout_marginTop="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_marginTop="12dp"/>
 
         <!-- Confirm Password -->
         <EditText
             android:id="@+id/etTeacherConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Confirm Password"
             android:inputType="textPassword"
             android:background="@drawable/input_bg"
             android:padding="14dp"
-            android:layout_marginTop="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_marginTop="12dp"/>
 
         <!-- Signup Button -->
         <Button
             android:id="@+id/btnTeacherSignup"
-            android:text="Sign Up"
-            android:backgroundTint="#4F46E5"
-            android:textColor="#FFFFFF"
-            android:layout_marginTop="24dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:text="Sign Up"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4F46E5"
+            android:layout_marginTop="24dp"
+            android:padding="14dp"/>
+
+        <!-- OR Divider -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="OR"
+            android:textColor="#64748B"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Google Sign Up Button -->
+        <Button
+            android:id="@+id/btnGoogleSignup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sign Up with Google"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4F46E5"
+            android:layout_marginTop="24dp"
+            android:padding="14dp"/>
 
     </LinearLayout>
 </ScrollView>
