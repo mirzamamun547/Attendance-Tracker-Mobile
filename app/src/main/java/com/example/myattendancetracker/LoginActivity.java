@@ -1,63 +1,222 @@
 package com.example.myattendancetracker;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.identity.SignInClient;
+import com.google.android.gms.auth.api.identity.SignInCredential;
+import com.google.android.gms.common.api.ApiException;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class LoginActivity extends AppCompatActivity {
 
+    private FirebaseAuth mAuth;
+    private SignInClient oneTapClient;
+    private BeginSignInRequest signInRequest;
+    private static final int REQ_ONE_TAP = 2;
+
+    private RadioGroup roleGroup;
     private EditText etEmail, etPassword;
-    private RadioGroup radioGroupRole;
-    private RadioButton rbTeacher, rbStudent;
-    private Button btnLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login); // <-- your XML file name
+        setContentView(R.layout.activity_login);
 
-        // Initialize views
+        mAuth = FirebaseAuth.getInstance();
+        oneTapClient = Identity.getSignInClient(this);
+
+        // Google One Tap configuration
+        signInRequest = BeginSignInRequest.builder()
+                .setGoogleIdTokenRequestOptions(
+                        BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                                .setSupported(true)
+                                .setServerClientId(getString(R.string.default_web_client_id))
+                                .setFilterByAuthorizedAccounts(false)
+                                .build())
+                .setAutoSelectEnabled(true)
+                .build();
+
+        // UI references
+        roleGroup = findViewById(R.id.radioGroupRole);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
-        radioGroupRole = findViewById(R.id.radioGroupRole);
-        rbTeacher = findViewById(R.id.rbTeacher);
-        rbStudent = findViewById(R.id.rbStudent);
-        btnLogin = findViewById(R.id.btnLogin);
+        Button emailBtn = findViewById(R.id.btnLogin);
+        Button googleBtn = findViewById(R.id.btnGoogleLogin);
+        Button signUpBtn = findViewById(R.id.btnSignUp);
 
-        // 👉 Add your login click listener here
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = etEmail.getText().toString().trim();
-                String password = etPassword.getText().toString().trim();
-                int selectedId = radioGroupRole.getCheckedRadioButtonId();
+        emailBtn.setOnClickListener(v -> loginWithEmail());
+        googleBtn.setOnClickListener(v -> signInWithGoogle());
+        signUpBtn.setOnClickListener(v -> signUpWithEmail());
+    }
 
-                String role = "";
-                if (selectedId == R.id.rbTeacher) {
-                    role = "Teacher";
-                } else if (selectedId == R.id.rbStudent) {
-                    role = "Student";
-                }
+    // ---------------- EMAIL LOGIN ----------------
+    private void loginWithEmail() {
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
-                if (email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(LoginActivity.this, "Please enter email and password", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(LoginActivity.this,
-                            "Login Successful\nEmail: " + email + "\nRole: " + role,
-                            Toast.LENGTH_LONG).show();
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Enter email and password", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-                    // 👉 Navigate to ProfileActivity for both Teacher and Student
-                    Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
-                    startActivity(intent);
-                }
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) fetchUserRole(user.getUid());
+                    } else {
+                        Toast.makeText(this, "Authentication Failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // ---------------- EMAIL SIGN-UP ----------------
+    private void signUpWithEmail() {
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Enter email and password", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int selectedId = roleGroup.getCheckedRadioButtonId();
+        if (selectedId == -1) {
+            Toast.makeText(this, "Please select a role", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String role = (selectedId == R.id.rbTeacher) ? "Teacher" : "Student";
+
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) saveRoleToFirestore(user.getUid(), email, role);
+                    } else {
+                        Toast.makeText(this, "Sign Up Failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // ---------------- GOOGLE LOGIN ----------------
+    private void signInWithGoogle() {
+        oneTapClient.beginSignIn(signInRequest)
+                .addOnSuccessListener(result -> {
+                    try {
+                        startIntentSenderForResult(
+                                result.getPendingIntent().getIntentSender(),
+                                REQ_ONE_TAP,
+                                null, 0, 0, 0, null);
+                    } catch (Exception e) {
+                        Log.e("OneTap", "Couldn't start One Tap UI", e);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("OneTap", "Sign-in failed", e);
+                    Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQ_ONE_TAP && resultCode == Activity.RESULT_OK && data != null) {
+            try {
+                SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
+                String idToken = credential.getGoogleIdToken();
+                if (idToken != null) firebaseAuthWithGoogle(idToken);
+            } catch (ApiException e) {
+                Log.e("OneTap", "Sign-in failed", e);
             }
-        });
+        }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) fetchUserRole(user.getUid());
+                    } else {
+                        Toast.makeText(this, "Authentication Failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // ---------------- FIRESTORE ROLE MANAGEMENT ----------------
+    private void fetchUserRole(String uid) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("teachers").document(uid).get().addOnSuccessListener(doc -> {
+            if (doc.exists()) {
+                goToProfile(doc.getString("role"), doc.getString("email"));
+            } else {
+                db.collection("students").document(uid).get().addOnSuccessListener(studentDoc -> {
+                    if (studentDoc.exists()) {
+                        goToProfile(studentDoc.getString("role"), studentDoc.getString("email"));
+                    } else {
+                        // First-time Google user → prompt for role
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null && user.getEmail() != null) {
+                            showRoleSelectionDialog(uid, user.getEmail());
+                        }
+                    }
+                });
+            }
+        }).addOnFailureListener(e -> Log.e("Login", "Error fetching role", e));
+    }
+
+    private void showRoleSelectionDialog(String uid, String email) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Role")
+                .setMessage("Please choose your role")
+                .setPositiveButton("Teacher", (dialog, which) -> saveRoleToFirestore(uid, email, "Teacher"))
+                .setNegativeButton("Student", (dialog, which) -> saveRoleToFirestore(uid, email, "Student"))
+                .setCancelable(false)
+                .show();
+    }
+
+    private void saveRoleToFirestore(String uid, String email, String role) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("email", email);
+        userData.put("role", role);
+
+        String collection = role.equals("Teacher") ? "teachers" : "students";
+
+        db.collection(collection).document(uid).set(userData)
+                .addOnSuccessListener(aVoid -> goToProfile(role, email))
+                .addOnFailureListener(e -> Toast.makeText(this, "Error saving role: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void goToProfile(String role, String email) {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        intent.putExtra("role", role);
+        intent.putExtra("email", email);
+        startActivity(intent);
+        finish();
     }
 }
-
