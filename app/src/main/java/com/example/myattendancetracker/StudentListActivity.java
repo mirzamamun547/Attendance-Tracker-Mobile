@@ -30,7 +30,7 @@ public class StudentListActivity extends AppCompatActivity {
     private final List<Student> filteredList = new ArrayList<>();
 
     private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,67 +44,52 @@ public class StudentListActivity extends AppCompatActivity {
         rvStudents.setLayoutManager(new LinearLayoutManager(this));
 
         db = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         adapter = new StudentAdapter(filteredList);
         rvStudents.setAdapter(adapter);
 
         setupSearch();
-        setupClassFilter();
-        loadTeacherStudents();
+        loadClassesForSpinner();
+        loadStudents();
     }
 
-    // ---------------- SEARCH ----------------
+    // 🔍 SEARCH
     private void setupSearch() {
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterStudents(s.toString());
-            }
             @Override public void afterTextChanged(Editable s) {}
-        });
-    }
 
-    // ---------------- CLASS FILTER ----------------
-    private void setupClassFilter() {
-        spinnerClass.setOnItemSelectedListener(new SimpleItemSelectedListener() {
             @Override
-            public void onItemSelected(String selectedClass) {
-                filterStudents(etSearch.getText().toString());
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterStudents();
             }
         });
     }
 
-    // ---------------- LOAD STUDENTS ----------------
-    private void loadTeacherStudents() {
+    // 📥 LOAD STUDENTS
+    private void loadStudents() {
 
-        if (mAuth.getCurrentUser() == null) {
-            Toast.makeText(this, "Teacher not logged in", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (auth.getCurrentUser() == null) return;
 
-        String teacherId = mAuth.getCurrentUser().getUid();
+        String teacherId = auth.getCurrentUser().getUid();
 
         db.collection("students")
                 .whereEqualTo("teacherId", teacherId)
                 .get()
-                .addOnSuccessListener(querySnapshot -> {
+                .addOnSuccessListener(snapshot -> {
 
                     studentList.clear();
                     filteredList.clear();
 
-                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                    for (QueryDocumentSnapshot doc : snapshot) {
 
-                        // 🔑 Firestore document ID
                         String id = doc.getId();
-
                         int roll = doc.getLong("roll") != null
                                 ? doc.getLong("roll").intValue() : 0;
 
                         String name = doc.getString("name");
-
-                        // 🔴 MUST MATCH AddStudentActivity FIELD NAME
-                        String className = doc.getString("classSection");
+                        String className = doc.getString("className");
 
                         int presentDays = doc.getLong("presentDays") != null
                                 ? doc.getLong("presentDays").intValue() : 0;
@@ -112,7 +97,6 @@ public class StudentListActivity extends AppCompatActivity {
                         int totalDays = doc.getLong("totalDays") != null
                                 ? doc.getLong("totalDays").intValue() : 0;
 
-                        // ✅ CORRECT CONSTRUCTOR
                         Student student = new Student(
                                 id,
                                 roll,
@@ -127,30 +111,72 @@ public class StudentListActivity extends AppCompatActivity {
 
                     filteredList.addAll(studentList);
                     adapter.notifyDataSetChanged();
-                    populateClassSpinner();
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this,
-                                "Failed to load students: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
     }
 
-    // ---------------- FILTER LOGIC ----------------
-    private void filterStudents(String query) {
+    // 🎓 LOAD CLASSES INTO SPINNER (FROM CLASSES COLLECTION)
+    private void loadClassesForSpinner() {
+
+        if (auth.getCurrentUser() == null) return;
+
+        String teacherId = auth.getCurrentUser().getUid();
+
+        List<String> classes = new ArrayList<>();
+        classes.add("All");
+
+        db.collection("classes")
+                .whereEqualTo("teacherId", teacherId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+
+                    for (QueryDocumentSnapshot doc : snapshot) {
+                        String className = doc.getString("className");
+                        if (className != null && !classes.contains(className)) {
+                            classes.add(className);
+                        }
+                    }
+
+                    ArrayAdapter<String> adapter =
+                            new ArrayAdapter<>(this,
+                                    android.R.layout.simple_spinner_item,
+                                    classes);
+
+                    adapter.setDropDownViewResource(
+                            android.R.layout.simple_spinner_dropdown_item);
+
+                    spinnerClass.setAdapter(adapter);
+
+                    spinnerClass.setOnItemSelectedListener(
+                            new SimpleItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(String item) {
+                                    filterStudents();
+                                }
+                            }
+                    );
+                });
+    }
+
+    // 🧠 FILTER STUDENTS
+    private void filterStudents() {
+
         filteredList.clear();
 
-        String selectedClass = spinnerClass.getSelectedItem() != null
-                ? spinnerClass.getSelectedItem().toString()
-                : "All";
+        String searchText = etSearch.getText().toString().toLowerCase();
+        String selectedClass = spinnerClass.getSelectedItem().toString();
 
         for (Student s : studentList) {
 
-            boolean matchName = s.getName() != null &&
-                    s.getName().toLowerCase().contains(query.toLowerCase());
+            boolean matchName =
+                    s.getName() != null &&
+                            s.getName().toLowerCase().contains(searchText);
 
-            boolean matchClass = selectedClass.equals("All") ||
-                    (s.getClassName() != null && s.getClassName().equals(selectedClass));
+            boolean matchClass =
+                    selectedClass.equals("All") ||
+                            s.getClassName().equals(selectedClass);
 
             if (matchName && matchClass) {
                 filteredList.add(s);
@@ -158,26 +184,5 @@ public class StudentListActivity extends AppCompatActivity {
         }
 
         adapter.notifyDataSetChanged();
-    }
-
-    // ---------------- CLASS SPINNER ----------------
-    private void populateClassSpinner() {
-
-        List<String> classes = new ArrayList<>();
-        classes.add("All");
-
-        for (Student s : studentList) {
-            if (s.getClassName() != null && !classes.contains(s.getClassName())) {
-                classes.add(s.getClassName());
-            }
-        }
-
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(this,
-                        android.R.layout.simple_spinner_item,
-                        classes);
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerClass.setAdapter(adapter);
     }
 }
