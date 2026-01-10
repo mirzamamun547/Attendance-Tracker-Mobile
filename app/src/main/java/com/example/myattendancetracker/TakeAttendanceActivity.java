@@ -48,15 +48,13 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        // 🔹 Get data from AttendanceActivity
+        // Get data from previous activity
         classId = getIntent().getStringExtra("classId");
         className = getIntent().getStringExtra("className");
         section = getIntent().getStringExtra("section");
         dateMillis = getIntent().getLongExtra("dateMillis", System.currentTimeMillis());
 
-        // Show selected class & date
         tvClassInfo.setText("Class: " + className + " - " + section);
-
         String dateStr = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 .format(new Date(dateMillis));
         tvDateInfo.setText("Date: " + dateStr);
@@ -71,7 +69,6 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
     // ---------------- LOAD STUDENTS ----------------
     private void loadStudents() {
-
         if (auth.getCurrentUser() == null) return;
 
         String teacherId = auth.getCurrentUser().getUid();
@@ -79,18 +76,15 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         db.collection("students")
                 .whereEqualTo("teacherId", teacherId)
                 .whereEqualTo("className", className)
-
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-
                     studentList.clear();
 
                     for (QueryDocumentSnapshot doc : querySnapshot) {
-
                         String id = doc.getId();
+                        String email = doc.getString("email"); // ✅ add email
                         int roll = doc.getLong("roll") != null ? doc.getLong("roll").intValue() : 0;
                         String name = doc.getString("name");
-
                         int presentDays = doc.getLong("presentDays") != null ? doc.getLong("presentDays").intValue() : 0;
                         int totalDays = doc.getLong("totalDays") != null ? doc.getLong("totalDays").intValue() : 0;
 
@@ -100,7 +94,8 @@ public class TakeAttendanceActivity extends AppCompatActivity {
                                 name,
                                 className,
                                 presentDays,
-                                totalDays
+                                totalDays,
+                                email // ✅ pass email
                         );
 
                         studentList.add(student);
@@ -115,14 +110,16 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
     // ---------------- SAVE ATTENDANCE ----------------
     private void saveAttendance() {
-
         if (auth.getCurrentUser() == null) return;
 
         String teacherId = auth.getCurrentUser().getUid();
 
         Map<String, Boolean> attendanceMap = new HashMap<>();
+        Map<String, String> emailMap = new HashMap<>();
+
         for (Student s : studentList) {
             attendanceMap.put(s.getId(), s.isPresent());
+            emailMap.put(s.getId(), s.getEmail()); // ✅ save email
         }
 
         Map<String, Object> attendanceData = new HashMap<>();
@@ -132,11 +129,11 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         attendanceData.put("section", section);
         attendanceData.put("dateMillis", dateMillis);
         attendanceData.put("attendance", attendanceMap);
+        attendanceData.put("attendanceEmails", emailMap); // ✅ save emails
 
         db.collection("attendance")
                 .add(attendanceData)
                 .addOnSuccessListener(docRef -> {
-
                     // update student stats
                     for (Student s : studentList) {
                         s.markAttendance();

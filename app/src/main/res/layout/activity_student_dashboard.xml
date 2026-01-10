@@ -1,49 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
+android:padding="16dp"
+android:background="#F1F5F9"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<!-- Title -->
+<TextView
+    android:text="Student Panel"
+    android:textSize="20sp"
+    android:textStyle="bold"
+    android:textColor="#111827"
+    android:layout_marginBottom="12dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+
+<!-- Student Info Card -->
+<LinearLayout
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#F1F5F9"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:padding="12dp"
+    android:layout_marginBottom="12dp"
+    android:elevation="2dp">
 
-    <TextView
-        android:text="My Classes"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="12dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <!-- RecyclerView for classes -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvClasses"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginBottom="12dp"/>
-
-    <!-- Reason of Absence -->
-    <TextView
-        android:text="Reason for Absence"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginTop="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <EditText
-        android:id="@+id/etReason"
-        android:hint="Enter your reason"
+    <!-- Roll Number -->
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
-        android:minLines="3"
-        android:background="@android:drawable/edit_text"
-        android:padding="8dp"
-        android:layout_marginBottom="12dp"/>
+        android:layout_marginBottom="8dp">
+        <TextView
+            android:text="Roll Number:"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/tvRoll"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/btnSubmitReason"
-        android:text="Submit Reason"
+    <!-- Name -->
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+        <TextView
+            android:text="Name:"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <!-- Course -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Class Selection -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="Class:"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+        <Spinner
+            android:id="@+id/spinnerClass"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</LinearLayout>
+
+<!-- Attendance Table -->
+<TextView
+    android:text="Attendance Records"
+    android:textSize="16sp"
+    android:textStyle="bold"
+    android:layout_marginBottom="8dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+
+<androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/rvAttendance"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:background="#FFFFFF"
+    android:padding="8dp"/>
+
+<!-- Reason for Absence -->
+<TextView
+    android:text="Reason for Absence"
+    android:textSize="16sp"
+    android:textStyle="bold"
+    android:layout_marginTop="12dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+
+<EditText
+    android:id="@+id/etReason"
+    android:hint="Enter your reason"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:inputType="textMultiLine"
+    android:minLines="3"
+    android:background="@android:drawable/edit_text"
+    android:padding="8dp"
+    android:layout_marginBottom="12dp"/>
+
+<Button
+    android:id="@+id/btnSubmitReason"
+    android:text="Submit Reason"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
+
 </LinearLayout>
