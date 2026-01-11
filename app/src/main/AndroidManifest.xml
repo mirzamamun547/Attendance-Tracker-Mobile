@@ -26,6 +26,8 @@
         <activity android:name=".StudentListActivity" />
         <activity android:name=".AddClassActivity" />
         <activity android:name=".TakeAttendanceActivity" />
+        <activity android:name=".ViewAbsenceReasonsActivity" />
+
         <activity android:name=".AttendanceActivity" />
         <activity android:name=".TeacherSignupActivity" />
         <activity android:name=".LoginActivity" /> <activity android:name=".ProfileActivity" />

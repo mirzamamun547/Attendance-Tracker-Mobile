@@ -14,16 +14,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <!-- Class Name -->
+
     <EditText
         android:id="@+id/etClassName"
-        android:hint="Class Name (e.g., 10)"
-        android:background="@drawable/input_bg"
-        android:padding="14dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:background="@drawable/input_bg"
+        android:hint="Class Name (e.g., 10)"
+        android:padding="14dp" />
 
-    <!-- Section Name -->
     <EditText
         android:id="@+id/etSectionName"
         android:hint="Section (e.g., A, B)"
@@ -35,11 +34,11 @@
 
     <Button
         android:id="@+id/btnAddClass"
-        android:text="Add Class"
-        android:backgroundTint="#4F46E5"
-        android:textColor="#FFFFFF"
-        android:layout_marginTop="24dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="#4F46E5"
+        android:text="Add Class"
+        android:textColor="#FFFFFF" />
 
 </LinearLayout>
