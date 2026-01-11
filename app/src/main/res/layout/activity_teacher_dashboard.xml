@@ -33,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <!-- Welcome Header -->
+                <!-- Welcome + Profile Card -->
                 <LinearLayout
                     android:orientation="vertical"
                     android:background="#4F46E5"
@@ -42,22 +42,37 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:gravity="center"
-                    android:backgroundTint="#4F46E5"
                     android:elevation="4dp"
                     android:clipToOutline="true"
                     android:layout_marginTop="8dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="4dp">
 
+                    <!-- Profile Image -->
+                    <ImageView
+                        android:id="@+id/imgProfileTeacher"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_gravity="center"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_profile_placeholder"
+                        android:background="@drawable/circle_background"
+                        android:clipToOutline="true"/>
+
+                    <!-- Upload / Change Button -->
+
+                    <!-- Welcome Text -->
                     <TextView
                         android:id="@+id/tvWelcomeTeacher"
                         android:text="Welcome, Teacher!"
                         android:textSize="22sp"
                         android:textStyle="bold"
                         android:textColor="#FFFFFF"
+                        android:layout_marginTop="12dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
+                    <!-- Email Preview -->
                     <TextView
                         android:id="@+id/tvEmailPreview"
                         android:text="email@example.com"
