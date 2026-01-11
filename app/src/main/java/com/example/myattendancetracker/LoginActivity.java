@@ -74,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
         btnGoogleLogin.setOnClickListener(v -> signInWithGoogle());
     }
 
-    // ---------------- EMAIL LOGIN ----------------
+
     private void loginWithEmail() {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
@@ -98,7 +98,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // ---------------- EMAIL SIGN-UP ----------------
+
     private void signUpWithEmail() {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
@@ -127,7 +127,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // ---------------- GOOGLE LOGIN ----------------
+
     private void signInWithGoogle() {
         oneTapClient.beginSignIn(signInRequest)
                 .addOnSuccessListener(result -> {
@@ -178,7 +178,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // ---------------- FETCH USER ROLE ----------------
+
     private void fetchUserRole(String uid) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -201,7 +201,7 @@ public class LoginActivity extends AppCompatActivity {
         }).addOnFailureListener(e -> Log.e("Login", "Error fetching role", e));
     }
 
-    // ---------------- ROLE SELECTION DIALOG ----------------
+
     private void showRoleSelectionDialog(String uid, String email) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Role")
@@ -212,7 +212,7 @@ public class LoginActivity extends AppCompatActivity {
                 .show();
     }
 
-    // ---------------- SAVE ROLE TO FIRESTORE ----------------
+
     private void saveRoleToFirestore(String uid, String email, String role) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Map<String, Object> userData = new HashMap<>();
@@ -226,7 +226,7 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Toast.makeText(this, "Error saving role: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    // ---------------- NAVIGATE TO PROFILE ----------------
+
     private void goToProfile(String role, String email) {
         Intent intent = new Intent(this, ProfileActivity.class);
         intent.putExtra("role", role);
