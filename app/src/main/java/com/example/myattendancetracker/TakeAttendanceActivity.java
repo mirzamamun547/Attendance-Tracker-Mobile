@@ -119,7 +119,7 @@ public class TakeAttendanceActivity extends AppCompatActivity {
 
         for (Student s : studentList) {
             attendanceMap.put(s.getId(), s.isPresent());
-            emailMap.put(s.getId(), s.getEmail()); // ✅ save email
+            emailMap.put(s.getId(), s.getEmail());
         }
 
         Map<String, Object> attendanceData = new HashMap<>();
@@ -129,27 +129,56 @@ public class TakeAttendanceActivity extends AppCompatActivity {
         attendanceData.put("section", section);
         attendanceData.put("dateMillis", dateMillis);
         attendanceData.put("attendance", attendanceMap);
-        attendanceData.put("attendanceEmails", emailMap); // ✅ save emails
+        attendanceData.put("attendanceEmails", emailMap);
 
+        // Check if attendance for this class & date already exists
         db.collection("attendance")
-                .add(attendanceData)
-                .addOnSuccessListener(docRef -> {
-                    // update student stats
-                    for (Student s : studentList) {
-                        s.markAttendance();
-                        db.collection("students")
-                                .document(s.getId())
-                                .update(
-                                        "presentDays", s.getPresentDays(),
-                                        "totalDays", s.getTotalDays()
+                .whereEqualTo("classId", classId)
+                .whereEqualTo("dateMillis", dateMillis)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        // Attendance already exists, update it
+                        String docId = querySnapshot.getDocuments().get(0).getId();
+                        db.collection("attendance").document(docId)
+                                .set(attendanceData) // overwrite
+                                .addOnSuccessListener(aVoid -> {
+                                    updateStudentStats();
+                                    Toast.makeText(this, "Attendance updated!", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "Failed to update attendance", Toast.LENGTH_SHORT).show()
+                                );
+                    } else {
+                        // Attendance does not exist, create new
+                        db.collection("attendance")
+                                .add(attendanceData)
+                                .addOnSuccessListener(docRef -> {
+                                    updateStudentStats();
+                                    Toast.makeText(this, "Attendance saved!", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "Failed to save attendance", Toast.LENGTH_SHORT).show()
                                 );
                     }
-
-                    Toast.makeText(this, "Attendance saved", Toast.LENGTH_SHORT).show();
-                    finish();
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to save attendance", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Failed to check existing attendance", Toast.LENGTH_SHORT).show()
                 );
+    }
+
+    // ---------------- Update student stats ----------------
+    private void updateStudentStats() {
+        for (Student s : studentList) {
+            s.markAttendance(); // updates presentDays & totalDays
+            db.collection("students")
+                    .document(s.getId())
+                    .update(
+                            "presentDays", s.getPresentDays(),
+                            "totalDays", s.getTotalDays()
+                    );
+        }
     }
 }
