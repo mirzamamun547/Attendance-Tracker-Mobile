@@ -25,13 +25,13 @@ public class AddClassActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_classes); // the XML we just created
+        setContentView(R.layout.activity_add_classes);
 
-        // Initialize Firebase
+
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        // Initialize views
+
         etClassName = findViewById(R.id.etClassName);
         etSectionName = findViewById(R.id.etSectionName);
         btnAddClass = findViewById(R.id.btnAddClass);
@@ -54,13 +54,13 @@ public class AddClassActivity extends AppCompatActivity {
             return;
         }
 
-        // Create a class map
+
         Map<String, Object> classData = new HashMap<>();
         classData.put("className", className);
         classData.put("section", section);
-        classData.put("teacherId", user.getUid()); // store teacher's UID
+        classData.put("teacherId", user.getUid());
 
-        // Save in Firestore under "classes" collection
+
         db.collection("classes")
                 .add(classData)
                 .addOnSuccessListener(documentReference -> {

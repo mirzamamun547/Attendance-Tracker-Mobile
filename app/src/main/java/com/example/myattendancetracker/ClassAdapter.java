@@ -4,41 +4,56 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+import java.util.List;
 
-public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ViewHolder> {
+public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHolder> {
 
-    private final String[] classes;
+    private List<String> classList;
+    private OnClassClickListener listener;
 
-    public ClassAdapter(String[] classes) {
-        this.classes = classes;
+    public ClassAdapter(List<String> classList, OnClassClickListener listener) {
+        this.classList = classList;
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(android.R.layout.simple_list_item_1, parent, false);
-        return new ViewHolder(v);
+    public ClassViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_class_card, parent, false);
+        return new ClassViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.tvClassName.setText(classes[position]);
+    public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
+        String className = classList.get(position);
+        holder.tvClassName.setText(className);
+
+        holder.cardView.setOnClickListener(v -> {
+            if (listener != null) listener.onClassClick(className);
+        });
     }
 
     @Override
     public int getItemCount() {
-        return classes.length;
+        return classList.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ClassViewHolder extends RecyclerView.ViewHolder {
         TextView tvClassName;
-        ViewHolder(View itemView) {
+        CardView cardView;
+
+        ClassViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvClassName = itemView.findViewById(android.R.id.text1);
+            tvClassName = itemView.findViewById(R.id.tvClassName);
+            cardView = itemView.findViewById(R.id.cardClass);
         }
+    }
+
+    public interface OnClassClickListener {
+        void onClassClick(String className);
     }
 }
