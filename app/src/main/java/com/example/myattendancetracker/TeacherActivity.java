@@ -85,7 +85,7 @@ public class TeacherActivity extends AppCompatActivity {
         setupButtons();
         setupRecyclerView();
         loadClassesFromFirestore();
-        loadProfileFromFirestore(); // Load image from ProfileActivity
+        loadProfileFromFirestore();
     }
 
     private void setupTeacherInfo() {
