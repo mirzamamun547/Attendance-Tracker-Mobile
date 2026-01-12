@@ -230,23 +230,32 @@ public class StudentActivity extends AppCompatActivity {
 
     // ---------------- Load profile image by email ----------------
     private void loadStudentProfileImage() {
-        if (studentEmail == null) return;
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
 
-        db.collection("students")
-                .whereEqualTo("email", studentEmail)
+        String studentUid = user.getUid(); // ✅ use UID
+
+        db.collection("students").document(studentUid)
                 .get()
-                .addOnSuccessListener(query -> {
-                    if (!query.isEmpty()) {
-                        DocumentSnapshot doc = query.getDocuments().get(0);
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
                         String base64 = doc.getString("profileImageBase64");
                         if (base64 != null && !base64.isEmpty()) {
-                            byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                            ivProfile.setImageBitmap(bitmap);
+                            try {
+                                byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                ivProfile.setImageBitmap(bitmap);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+
+                            }
                         }
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Failed to load profile image: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to load profile image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                });
     }
 
     // ---------------- Open Gallery to pick image ----------------
